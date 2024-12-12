@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Snowfall Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #00274D;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="score">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+
+        class Snowflake {
+            constructor(x, y, size, speed) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.speed = speed;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) {
+                    this.y = -this.size;
+                    this.x = Math.random() * canvas.width;
+                }
+                this.draw();
+            }
+        }
+
+        const snowflakes = [];
+
+        for (let i = 0; i < 100; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 3 + 2;
+            const speed = Math.random() * 1 + 0.5;
+            snowflakes.push(new Snowflake(x, y, size, speed));
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            snowflakes.forEach((snowflake) => {
+                snowflake.update();
+            });
+
+            requestAnimationFrame(updateGame);
+        }
+
+        function updateScore(event) {
+            const x = event.clientX;
+            const y = event.clientY;
+
+            snowflakes.forEach((snowflake, index) => {
+                const distance = Math.sqrt(
+                    (x - snowflake.x) ** 2 + (y - snowflake.y) ** 2
+                );
+
+                if (distance < snowflake.size) {
+                    snowflakes.splice(index, 1);
+                    score += 1;
+                    document.getElementById('score').textContent = score;
+                }
+            });
+        }
+
+        canvas.addEventListener('click', updateScore);
+        updateGame();
+    </script>
+</body>
+</html>
